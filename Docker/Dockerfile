@@ -7,7 +7,7 @@ FROM nvcr.io/nvidia/pytorch:20.03-py3
 # ”--no-browser” => ブラウザを立ち上げない。コンテナ側にはブラウザがないので 。
 # "--allow-root" => rootユーザーの許可。セキュリティ的には良くないので、自分で使うときだけ。
 # "--NotebookApp.token=''" => トークンなしで起動許可。これもセキュリティ的には良くない。
-ENTRYPOINT ["jupyter-lab", "--ip=0.0.0.0", "--port=8887", "--no-browser", "--allow-root", "--NotebookApp.token=''"]
+# ENTRYPOINT ["xvfb-run", "-s", "-screen 0 1280x720x24", "jupyter-lab", "--ip=0.0.0.0", "--port=8887", "--no-browser", "--allow-root", "--NotebookApp.token=''"]
 
 # CMD命令はコンテナ起動時に実行するコマンドを指定（docker runの時に上書きする可能性のあるもの）
 # "--notebook-dir=/workdir" => Jupyter Labのルートとなるディレクトリを指定
@@ -19,5 +19,14 @@ RUN jupyter contrib nbextension install --user && jupyter nbextensions_configura
 
 RUN pip install ipywidgets --user
 
-ADD ./requirements.txt /code
-RUN pip install -r requirements.txt 
+RUN apt-get update && apt-get install -y python-opengl xvfb \
+ && apt-get clean \
+ && rm -rf /var/lib/apt/lists/*
+
+ADD ./Docker/requirements.txt /workspace
+RUN pip install -r /workspace/requirements.txt 
+
+RUN echo '#!/bin/bash' > /tmp/openai-gym.sh && \
+    echo '/usr/bin/xvfb-run -s "-screen 0 1280x720x24" jupyter-lab --port=8887 --no-browser --ip=0.0.0.0 --allow-root --NotebookApp.token='' ' >> /tmp/openai-gym.sh && \
+    chmod +x /tmp/openai-gym.sh
+CMD ["/tmp/openai-gym.sh"]

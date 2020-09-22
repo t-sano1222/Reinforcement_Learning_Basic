@@ -1,0 +1,19 @@
+    version: '2.3'
+    services:
+        ## Image runtime service
+        ## This can be used to add volume mounts or pass environment variables
+        ## Todo: make a service which can use the container interactively
+        t_sano-RL-Learning:
+            container_name: t_sano-rl-learning
+            build: .
+            image: "${IMAGE_NAME}:${DOCKERTAG}"
+            tty: true
+            runtime: nvidia
+            environment:
+              - NVIDIA_VISIBLE_DEVICES=all
+              - NVIDIA_DRIVER_CAPABILITIES=all
+            volumes:
+                - "./../src:/workspace/src"
+            ports:
+                - 8887:8887
+                - 6666:6666
