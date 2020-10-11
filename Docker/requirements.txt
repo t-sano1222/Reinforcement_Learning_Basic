@@ -1,6 +1,6 @@
 numpy
 gym
-JSAnimation
-pyglet==1.5.0
-ffmpeg-python
-matplotlib==3.0.3
+# JSAnimation
+# pyglet==1.5.0
+# ffmpeg-python
+matplotlib
